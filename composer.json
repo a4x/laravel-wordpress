@@ -1,0 +1,11 @@
+{
+    "name": "a4x/laravel-wordpress",
+    "description": "A one-class package that locally caches your Wordpress posts as a Laravel collection",
+    "authors": [
+        {
+            "name": "Lionel Martin",
+            "email": "lionel@a440.io"
+        }
+    ],
+    "require": {}
+}
