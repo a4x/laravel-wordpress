@@ -11,7 +11,7 @@ return [
     */
 
     'url'               => env('WORDPRESS_URL', 'localhost'),
-    'refresh'           => 10,
-    'checklastnposts'   => 10
+    'refresh'           => env('WORDPRESS_REFRESH', 10),
+    'checklastnposts'   => env('WORDPRESS_CHECKLASTNPOSTS', 10),
 
 ];

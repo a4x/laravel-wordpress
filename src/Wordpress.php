@@ -20,16 +20,16 @@ class Wordpress {
 
     public function __construct() {
         $this->posts = Cache::rememberForever('a440:wordpress:posts', function() {
-            return collect(self::wp_get('get_posts')['posts']);
+            return collect($this->wp_get('get_posts')['posts']);
         });
 
         $this->categories = Cache::rememberForever('a440:wordpress:categories', function() {
-            return collect(self::wp_get('get_category_index')['categories']);
+            return collect($this->wp_get('get_category_index')['categories']);
         });
 
         Cache::remember('a440:wordpress:last_updated', config('wordpress.refresh'), function() {
             $last_post_id = $this->posts->max('id');
-            $posts = collect(self::wp_get('get_posts', config('wordpress.checklastnposts'))['posts']);
+            $posts = collect($this->wp_get('get_posts', config('wordpress.checklastnposts'))['posts']);
 
             $posts->reverse(function($item) use ($last_post_id){
                 if ($item->id > $last_post_id)
@@ -40,7 +40,7 @@ class Wordpress {
         });
     }
 
-    private static function wp_get($type, $per_page = -1) {
+    private function wp_get($type, $per_page = -1) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, 'http://'.config('wordpress.url').'?json='.$type.'&count='.$per_page);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -49,7 +49,7 @@ class Wordpress {
 
         if (curl_errno($ch)) {
             curl_close($ch);
-            throw new HttpException;
+            throw new HttpException(500);
         } else {
             $result = json_decode($response, true);
             curl_close($ch);
