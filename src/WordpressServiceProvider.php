@@ -13,7 +13,7 @@ class WordpressServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app->make('A440\Wordpress\Wordpress');
+
     }
 
     /**
@@ -23,6 +23,12 @@ class WordpressServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->bind('wordpress', function($app){
+            return new Wordpress($app);
+        });
 
+        config([
+            'config/wordpress.php',
+        ]);
     }
 }
