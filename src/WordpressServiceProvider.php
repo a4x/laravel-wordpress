@@ -13,7 +13,9 @@ class WordpressServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-
+        $this->publishes([
+            __DIR__.'/config/wordpress.php' => config_path('wordpress.php'),
+        ]);
     }
 
     /**
@@ -26,9 +28,5 @@ class WordpressServiceProvider extends ServiceProvider
         $this->app->bind('wordpress', function($app){
             return new Wordpress($app);
         });
-
-        config([
-            'config/wordpress.php',
-        ]);
     }
 }
