@@ -27,7 +27,7 @@ class Wordpress {
             return collect(self::wp_get('get_category_index')['categories']);
         });
 
-        Cache::remember('a440:wordpress:last_updated_', config('wordpress.refresh'), function() {
+        Cache::remember('a440:wordpress:last_updated', config('wordpress.refresh'), function() {
             $last_post_id = $this->posts->max('id');
             $posts = collect(self::wp_get('get_posts', config('wordpress.checklastnposts'))['posts']);
 
@@ -36,6 +36,8 @@ class Wordpress {
                     $this->posts->prepend($item);
                 }
             });
+
+            Cache::forever('a440:wordpress:posts', $this->posts());
 
             return true;
         });
