@@ -19,31 +19,12 @@ class Wordpress {
     }
 
     public function __construct() {
-        $this->posts = Cache::rememberForever('a440:wordpress:posts', function() {
-            return collect(self::wp_get('get_posts')['posts']);
-        });
-
-        $this->categories = Cache::rememberForever('a440:wordpress:categories', function() {
-            return collect(self::wp_get('get_category_index')['categories']);
-        });
-
-        Cache::remember('a440:wordpress:last_updated', config('wordpress.refresh'), function() {
-            $last_post_id = $this->posts->max('id');
-            $posts = collect(self::wp_get('get_posts', config('wordpress.checklastnposts'))['posts']);
-
-            $posts->reverse()->each(function($item, $key) use ($last_post_id){
-                if ($item['id'] > $last_post_id) {
-                    $this->posts->prepend($item);
-                }
-            });
-
-            Cache::forever('a440:wordpress:posts', $this->posts());
-
-            return true;
-        });
+        $this->posts = Cache::get('a440:wordpress:posts', collect([]));
+        $this->categories = Cache::get('a440:wordpress:categories', collect([]));
     }
 
     private static function wp_get($type, $per_page = -1) {
+        // should put in for loop for count -1
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, 'http://'.config('wordpress.url').'?json='.$type.'&count='.$per_page);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -58,5 +39,15 @@ class Wordpress {
             curl_close($ch);
             return $result;
         }
+    }
+
+    public static function refresh() {
+        Cache::rememberForever('a440:wordpress:posts', function() {
+            return collect(self::wp_get('get_posts')['posts']);
+        });
+
+        Cache::rememberForever('a440:wordpress:categories', function() {
+            return collect(self::wp_get('get_category_index')['categories']);
+        });
     }
 }
