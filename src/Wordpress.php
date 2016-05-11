@@ -42,12 +42,8 @@ class Wordpress {
     }
 
     public static function refresh() {
-        Cache::rememberForever('a440:wordpress:posts', function() {
-            return collect(self::wp_get('get_posts')['posts']);
-        });
+        Cache::forever('a440:wordpress:posts', collect(self::wp_get('get_posts')['posts']));
 
-        Cache::rememberForever('a440:wordpress:categories', function() {
-            return collect(self::wp_get('get_category_index')['categories']);
-        });
+        Cache::forever('a440:wordpress:categories', collect(self::wp_get('get_category_index')['categories']));
     }
 }
