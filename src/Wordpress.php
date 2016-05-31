@@ -35,14 +35,52 @@ class Wordpress {
             curl_close($ch);
             throw new HttpException;
         } else {
+            $response = str_replace(config('wordpress.replace_from'), config('wordpress.replace_to'), $response);
             $result = json_decode($response, true);
             curl_close($ch);
             return $result;
         }
     }
 
+    public function getPost($id) {
+        return Cache::get('a440:wordpress:posts_'.$id);
+    }
+
     public static function refresh() {
-        Cache::forever('a440:wordpress:posts', collect(self::wp_get('get_posts')['posts']));
+        $posts = collect(self::wp_get('get_posts')['posts']);
+
+        $posts->each(function($item) {
+            //delete all previous posts
+            if (\Config('cache.default') == 'redis') {
+                Redis::pipeline(function ($pipe) {
+                    foreach (Redis::keys('laravel:a440:wordpress:posts_*') as $key) {
+                        $pipe->del($key);
+                    }
+                });
+            }
+
+            Cache::forever('a440:wordpress:posts_'.$item['id'], $item);
+        });
+
+        Cache::forever('a440:wordpress:posts', $posts->transform(function($item) {
+            unset($item['content']);
+            unset($item['url']);
+            unset($item['status']);
+            unset($item['title_plain']);
+            unset($item['modified']);
+            unset($item['categories']);
+            unset($item['comments']);
+            unset($item['attachments']);
+            unset($item['comment_count']);
+            unset($item['comment_status']);
+            unset($item['thumbnail']);
+            unset($item['custom_fields']);
+            unset($item['thumbnail_size']);
+            unset($item['thumbnail_images']['full']);
+            unset($item['thumbnail_images']['thumbnail']);
+            unset($item['thumbnail_images']['post-thumbnail']);
+            return $item;
+        }));
 
         Cache::forever('a440:wordpress:categories', collect(self::wp_get('get_category_index')['categories']));
     }
