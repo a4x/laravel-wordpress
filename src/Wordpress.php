@@ -47,15 +47,6 @@ class Wordpress {
     }
 
     public static function refresh() {
-        //delete all previous posts
-        if (\Config('cache.default') == 'redis') {
-            Redis::pipeline(function ($pipe) {
-                foreach (Redis::keys('laravel:a440:wordpress:posts_*') as $key) {
-                    $pipe->del($key);
-                }
-            });
-        }
-
         $posts = collect(self::wp_get('get_posts')['posts'])->each(function($item) {
             Cache::forever('a440:wordpress:posts_'.$item['id'], $item);
         });
