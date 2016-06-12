@@ -57,7 +57,6 @@ class Wordpress {
             unset($item['status']);
             unset($item['title_plain']);
             unset($item['modified']);
-            unset($item['categories']);
             unset($item['comments']);
             unset($item['attachments']);
             unset($item['comment_count']);
